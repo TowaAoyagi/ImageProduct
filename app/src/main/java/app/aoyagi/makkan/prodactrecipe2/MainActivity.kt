@@ -1,58 +1,58 @@
 package app.aoyagi.makkan.prodactrecipe2
 
+import android.content.ContentValues
 import android.content.Intent
-import android.graphics.Bitmap
-import androidx.appcompat.app.AppCompatActivity
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
-import android.util.Log
-import android.view.View
-import android.widget.CheckBox
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import io.realm.Realm
 import io.realm.RealmResults
-import io.realm.Sort
-import kotlinx.android.synthetic.main.activity_image.*
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
+
 
 class MainActivity : AppCompatActivity() {
 
     private val realm: Realm by lazy {
         Realm.getDefaultInstance()
     }
-    val REQUEST_IMAGE_CAPTURE = 1
+    private val REQUEST_IMAGE_CAPTURE = 1
+    private val RESULT_CAMERA = 1001
+    private var cameraUri: Uri? = null
+    private var cameraFile: File? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
         val imageList = readAll()
 
         makeAdapter(imageList)
         fab1.setOnClickListener {
-            dispatchTakePictureIntent()
-            realm.close()
+            cameraIntent()
         }
 
-
-
-    }
-
-
-
-    private fun dispatchTakePictureIntent() {
-        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-            takePictureIntent.resolveActivity(packageManager)?.also {
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
-            }
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            val imageBitmap = data?.extras?.get("data") as Bitmap
-            create(imageBitmap)
+            if (cameraUri != null) {
+                create(cameraUri!!)
+                registerDatabase(cameraFile!!)
+            } else {
 
+            }
+            val imageList = readAll()
+            makeAdapter(imageList)
         }
     }
 
@@ -62,13 +62,29 @@ class MainActivity : AppCompatActivity() {
         realm.close()
     }
 
-    fun create(bitmap: Bitmap) {
+    fun create(uri: Uri) {
         realm.executeTransaction {
             val realmInfo = realm.createObject(RealmInfo::class.java, UUID.randomUUID().toString())
-            realmInfo.imageBitmap = bitmap
-
+            realmInfo.uri = uri.toString()
 
         }
+    }
+
+    private fun cameraIntent() {
+        val cFolder = getExternalFilesDir(Environment.DIRECTORY_DCIM)
+        val fileDate: String = SimpleDateFormat(
+            "ddHHmmss", Locale.US
+        ).format(Date())
+        val fileName = String.format("CameraIntent_%s.jpg", fileDate)
+        cameraFile = File(cFolder, fileName)
+        cameraUri = FileProvider.getUriForFile(
+            this@MainActivity,
+            applicationContext.packageName + ".fileprovider",
+            cameraFile!!
+        )
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, cameraUri)
+        startActivityForResult(intent, RESULT_CAMERA)
     }
 
     fun makeAdapter(todoList: RealmResults<RealmInfo>) {
@@ -98,7 +114,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
+    private fun registerDatabase(file: File) {
+        val contentValues = ContentValues()
+        val contentResolver = this@MainActivity.contentResolver
+        contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+        contentValues.put("_data", file.absolutePath)
+        contentResolver.insert(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues
+        )
+    }
 
 
 }
