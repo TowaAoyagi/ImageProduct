@@ -1,11 +1,13 @@
 package app.aoyagi.makkan.prodactrecipe2
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -43,11 +45,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             if (cameraUri != null) {
                 create(cameraUri!!)
                 registerDatabase(cameraFile!!)
+                Log.d("camerafile",cameraFile.toString())
             } else {
 
             }
@@ -70,12 +72,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("LongLogTag")
     private fun cameraIntent() {
         val cFolder = getExternalFilesDir(Environment.DIRECTORY_DCIM)
         val fileDate: String = SimpleDateFormat(
             "ddHHmmss", Locale.US
         ).format(Date())
-        val fileName = String.format("CameraIntent_%s.jpg", fileDate)
+        val fileName = String.format("CameraIntent_.jpg", fileDate)
         cameraFile = File(cFolder, fileName)
         cameraUri = FileProvider.getUriForFile(
             this@MainActivity,
@@ -119,9 +122,7 @@ class MainActivity : AppCompatActivity() {
         val contentResolver = this@MainActivity.contentResolver
         contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
         contentValues.put("_data", file.absolutePath)
-        contentResolver.insert(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues
-        )
+        contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
     }
 
 
