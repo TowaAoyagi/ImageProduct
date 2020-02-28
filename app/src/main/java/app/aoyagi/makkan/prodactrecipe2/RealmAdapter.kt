@@ -50,7 +50,7 @@ class RealmAdapter(
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var imageView: ImageView = view.imageView
         var linearLayout: LinearLayout = view.linear
-        var titleTextView : TextView = view.textView
+        var titleTextView: TextView = view.textView
 
     }
 

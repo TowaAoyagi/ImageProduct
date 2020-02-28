@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
 
         makeAdapter(imageList)
         fab1.setOnClickListener {
-            val intent = Intent(this,activity_view::class.java)
+            val intent = Intent(this, activity_view::class.java)
             startActivity(intent)
         }
 
@@ -79,7 +79,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun readAll(): RealmResults<RealmInfo> {
-//        チェックボックスにチェックがついてる順にソート
         return realm.where(RealmInfo::class.java).findAll()
     }
 

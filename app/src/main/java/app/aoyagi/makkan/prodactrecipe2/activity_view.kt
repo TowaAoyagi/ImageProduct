@@ -77,24 +77,18 @@ class activity_view : AppCompatActivity() {
     }
 
 
-
     fun update(view: View) {
 
         val date = Date()
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.JAPANESE)
         val updateDate = sdf.format(date)
-        val intent = Intent(this,MainActivity::class.java)
+        val intent = Intent(this, MainActivity::class.java)
         if (bitmap != null) {
             save(updateDate)
             startActivity(intent)
             finish()
         }
-//        val info = realm.where(RealmInfo::class.java).equalTo(
-//            "date",
-//            this.intent.getStringExtra("date")
-//        ).findFirst()
-//
-//        finish()
+
     }
 
     override fun onRequestPermissionsResult(
@@ -154,7 +148,7 @@ class activity_view : AppCompatActivity() {
             contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)!!
 
 
-        val intent: Intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
         startActivityForResult(intent, REQUEST_CODE_CAMERA)
     }
@@ -162,7 +156,6 @@ class activity_view : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
 
         if (requestCode == REQUEST_CODE_CAMERA && resultCode == Activity.RESULT_OK) {
             bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri)
