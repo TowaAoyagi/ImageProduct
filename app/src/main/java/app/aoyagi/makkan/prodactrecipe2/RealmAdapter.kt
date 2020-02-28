@@ -1,6 +1,9 @@
 package app.aoyagi.makkan.prodactrecipe2
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import io.realm.OrderedRealmCollection
 import io.realm.RealmRecyclerViewAdapter
 import kotlinx.android.synthetic.main.activity_image.view.*
+import java.io.BufferedInputStream
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -30,11 +35,10 @@ class RealmAdapter(
         holder.linearLayout.setOnClickListener {
             listener.onItemClick(task)
         }
-//        holder.titleTextView.text = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.JAPANESE).format(task.createdAt)
-        holder.titleTextView.text = "tilte"
-        val uri = task.uri.toUri()
-        Log.d("String to URI", uri.toString())
-        holder.imageView.setImageURI(uri)
+        holder.titleTextView.text = task.id
+        val uri = Uri.parse(task.uri)
+        val bitmap = makeBitmap(uri, context)
+        holder.imageView.setImageBitmap(bitmap)
     }
 
     //    Inflaterをここで設定する
@@ -44,10 +48,16 @@ class RealmAdapter(
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val titleTextView: TextView = view.textView
         var imageView: ImageView = view.imageView
         var linearLayout: LinearLayout = view.linear
+        var titleTextView : TextView = view.textView
 
+    }
+
+    fun makeBitmap(uri: Uri, context: Context): Bitmap {
+        val stream: InputStream? = context.getContentResolver().openInputStream(uri)
+        val bitmap: Bitmap = BitmapFactory.decodeStream(BufferedInputStream(stream))
+        return bitmap
     }
 
     interface OnItemClickListener {

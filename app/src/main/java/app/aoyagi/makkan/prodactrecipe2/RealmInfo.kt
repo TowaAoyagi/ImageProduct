@@ -8,5 +8,6 @@ open class RealmInfo : RealmObject(){
     @PrimaryKey
     open var id: String = UUID.randomUUID().toString()
     open var uri:String = ""
+    open var date :String = ""
     open var createdAt: Date = Date(System.currentTimeMillis())
 }
